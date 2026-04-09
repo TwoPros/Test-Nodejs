@@ -6,13 +6,11 @@
 <body>
 
 <h1 id="text">Loading...</h1>
-v
 <script>
     fetch("/api/index.js")
         .then(res => res.json())
         .then(data => {
-alert(JSON.stringify(data));
-            document.getElementById("text").innerText = data.message;
+            document.getElementById("text").innerText = JSON.stringify(data);
         })
         .catch(err => {
             console.log(err);
