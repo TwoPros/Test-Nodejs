@@ -1,5 +1,6 @@
 export default function handler(req, res) {
     res.status(200).json({
-        message: "Hello from Vercel Node.js 🚀"
+        name: "Eyob",
+        skill: "Programmer"
     });
 }
