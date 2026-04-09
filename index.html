@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Connect Frontend & Backend</title>
+</head>
+<body>
+
+<h1 id="text">Loading...</h1>
+
+<script>
+    fetch("/api")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("text").innerText = data.message;
+        })
+        .catch(err => {
+            console.log(err);
+        });
+</script>
+
+</body>
+</html>
