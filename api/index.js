@@ -1,5 +1,5 @@
-module.exports = (req, res) => {
+export default function handler(req, res) {
     res.status(200).json({
-        message: "Working 🚀"
+        message: "Hello from Vercel Node.js 🚀"
     });
-};
+}
