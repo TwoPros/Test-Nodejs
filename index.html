@@ -11,6 +11,7 @@
     fetch("/api/index.js")
         .then(res => res.json())
         .then(data => {
+alert(data);
             document.getElementById("text").innerText = data.message;
         })
         .catch(err => {
