@@ -1,5 +1,8 @@
 {
-  "name": "EA station",
+  "name": "drive-app",
   "version": "1.0.0",
-  "type": "module"
+  "type": "module",
+  "dependencies": {
+    "googleapis": "^133.0.0"
+  }
 }
