@@ -24,19 +24,39 @@ async function upload() {
     reader.onload = async () => {
         const base64 = reader.result;
 
-        await fetch("/api/upload", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                name: file.name,
-                type: file.type,
-                content: base64
-            })
-        });
+        try {
+            const response = await fetch("/api/upload", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name: file.name,
+                    type: file.type,
+                    content: base64
+                })
+            });
 
-        console.log("UPLOAD RESPONSE:", JSON.stringify(response.data));
+            const data = await response.json();
+            console.log("UPLOAD RESPONSE:", JSON.stringify(data));
+
+            if (!response.ok) {
+                alert(`Upload failed: ${data.error || 'Unknown error'}`);
+                return;
+            }
+
+            alert("Upload successful!");
+            loadFiles(); // Refresh the file list
+
+        } catch (error) {
+            console.error("Upload error:", error);
+            alert(`Upload error: ${error.message}`);
+        }
+    };
+
+    reader.onerror = (error) => {
+        console.error("FileReader error:", error);
+        alert("Error reading file");
     };
 
     reader.readAsDataURL(file);
