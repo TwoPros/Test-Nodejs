@@ -13,7 +13,11 @@ export default async function handler(req, res) {
     const drive = google.drive({ version: "v3", auth });
 
     try {
-        const { name, content } = req.body;
+        const { name, type, content } = req.body;
+
+        // convert base64 dataURL → Buffer
+        const base64Data = content.split(",")[1];
+        const buffer = Buffer.from(base64Data, "base64");
 
         const response = await drive.files.create({
             requestBody: {
@@ -21,8 +25,8 @@ export default async function handler(req, res) {
                 parents: [process.env.FOLDER_ID]
             },
             media: {
-                mimeType: "text/plain",
-                body: content
+                mimeType: type,   // image/png, image/jpeg, etc
+                body: buffer
             }
         });
 
