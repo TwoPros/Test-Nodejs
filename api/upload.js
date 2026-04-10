@@ -1,48 +1,56 @@
+import Busboy from "busboy";
 import { google } from "googleapis";
-import { PassThrough } from "stream";
 
-const auth = new google.auth.OAuth2(
-    process.env.CLIENT_ID,
-    process.env.CLIENT_SECRET
-);
-
-auth.setCredentials({
-    refresh_token: process.env.REFRESH_TOKEN
-});
+export const config = {
+  api: {
+    bodyParser: false // 🚨 REQUIRED
+  }
+};
 
 export default async function handler(req, res) {
-    const drive = google.drive({ version: "v3", auth });
+  const auth = new google.auth.OAuth2(
+    process.env.CLIENT_ID,
+    process.env.CLIENT_SECRET
+  );
 
+  auth.setCredentials({
+    refresh_token: process.env.REFRESH_TOKEN
+  });
+
+  const drive = google.drive({ version: "v3", auth });
+
+  const busboy = Busboy({ headers: req.headers });
+
+  let uploadPromise;
+
+  busboy.on("file", (fieldname, file, info) => {
+    const { filename, mimeType } = info;
+
+    uploadPromise = drive.files.create({
+      requestBody: {
+        name: filename,
+        parents: [process.env.FOLDER_ID]
+      },
+      media: {
+        mimeType,
+        body: file // ✅ direct stream
+      }
+    });
+  });
+
+  busboy.on("finish", async () => {
     try {
-        const { name, type, content } = req.body;
+      const response = await uploadPromise;
 
-        const base64Data = content.split(",")[1];
-        const buffer = Buffer.from(base64Data, "base64");
-
-        // ✅ FIXED STREAM
-        const stream = new PassThrough();
-        stream.end(buffer);
-
-        const response = await drive.files.create({
-            requestBody: {
-                name,
-                parents: [process.env.FOLDER_ID]
-            },
-            media: {
-                mimeType: type,
-                body: stream
-            }
-        });
-
-        console.log("UPLOAD RESPONSE:", response.data);
-
-        res.status(200).json({
-            message: "Uploaded",
-            fileId: response.data.id
-        });
+      res.status(200).json({
+        message: "Uploaded",
+        fileId: response.data.id
+      });
 
     } catch (err) {
-        console.log(err);
-        res.status(500).json({ error: err.message });
+      res.status(500).json({ error: err.message });
     }
+  });
+
+  req.pipe(busboy);
 }
