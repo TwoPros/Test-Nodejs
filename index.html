@@ -16,49 +16,27 @@ async function upload() {
     const fileInput = document.getElementById("file");
     const file = fileInput.files[0];
 
-    if (!file) return alert("Select a file first");
+    if (!file) return alert("Select a file");
 
-    const reader = new FileReader();
+    const formData = new FormData();
+    formData.append("file", file);
 
-    reader.onload = async () => {
-        const base64 = reader.result;
+    const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData
+    });
 
-        try {
-            const response = await fetch("/api/upload", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    name: file.name,
-                    type: file.type,
-                    content: base64
-                })
-            });
+    const data = await res.json();
 
-            const data = await response.json();
-            console.log("UPLOAD RESPONSE:", JSON.stringify(data));
+    console.log(data);
 
-            if (!response.ok) {
-                alert(`Upload failed: ${data.error || 'Unknown error'}`);
-                return;
-            }
+    if (!res.ok) {
+        alert("Upload failed");
+        return;
+    }
 
-            alert("Upload successful!");
-            loadFiles(); // Refresh the file list
-
-        } catch (error) {
-            console.error("Upload error:", error);
-            alert(`Upload error: ${error.message}`);
-        }
-    };
-
-    reader.onerror = (error) => {
-        console.error("FileReader error:", error);
-        alert("Error reading file");
-    };
-
-    reader.readAsDataURL(file);
+    alert("Uploaded!");
+    loadFiles();
 }
 
 async function loadFiles() {
