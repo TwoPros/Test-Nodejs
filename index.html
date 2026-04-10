@@ -4,6 +4,7 @@
 
 <h2>Upload File</h2>
 <input id="filename" placeholder="File name">
+<input id="file" type="file" accept="image/*">
 <textarea id="content" placeholder="File content"></textarea>
 <button onclick="upload()">Upload</button>
 
@@ -13,18 +14,32 @@
 
 <script>
 async function upload() {
-    const name = document.getElementById("filename").value;
-    const content = document.getElementById("content").value;
+    const fileInput = document.getElementById("file");
+    const file = fileInput.files[0];
 
-    await fetch("/api/upload", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ name, content })
-    });
+    if (!file) return alert("Select a file first");
 
-    loadFiles();
+    const reader = new FileReader();
+
+    reader.onload = async () => {
+        const base64 = reader.result;
+
+        await fetch("/api/upload", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name: file.name,
+                type: file.type,
+                content: base64
+            })
+        });
+
+        alert("Uploaded!");
+    };
+
+    reader.readAsDataURL(file);
 }
 
 async function loadFiles() {
