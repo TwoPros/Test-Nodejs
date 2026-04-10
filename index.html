@@ -1,21 +1,60 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <title>Connect Frontend & Backend</title>
-</head>
 <body>
 
-<h1 id="text">Loading...</h1>
+<h2>Upload File</h2>
+<input id="filename" placeholder="File name">
+<textarea id="content" placeholder="File content"></textarea>
+<button onclick="upload()">Upload</button>
+
+<h2>Files</h2>
+<button onclick="loadFiles()">Refresh</button>
+<ul id="list"></ul>
+
 <script>
-    fetch("/api/index.js")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("text").innerText =
-            data.name + " - " + data.skill;
-        })
-        .catch(err => {
-            console.log(err);
-        });
+async function upload() {
+    const name = document.getElementById("filename").value;
+    const content = document.getElementById("content").value;
+
+    await fetch("/api/upload", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ name, content })
+    });
+
+    loadFiles();
+}
+
+async function loadFiles() {
+    const res = await fetch("/api/list");
+    const files = await res.json();
+
+    const ul = document.getElementById("list");
+    ul.innerHTML = "";
+
+    files.forEach(file => {
+        const li = document.createElement("li");
+        li.innerHTML = `
+            ${file.name}
+            <button onclick="deleteFile('${file.id}')">Delete</button>
+        `;
+        ul.appendChild(li);
+    });
+}
+
+async function deleteFile(id) {
+    await fetch("/api/delete", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ id })
+    });
+
+    loadFiles();
+}
 </script>
 
 </body>
