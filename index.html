@@ -33,6 +33,7 @@ async function loadFiles() {
 
     const ul = document.getElementById("list");
     ul.innerHTML = "";
+console.log(JSON.stringify(files));
 
     files.forEach(file => {
         const li = document.createElement("li");
